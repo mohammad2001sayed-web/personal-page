@@ -32,7 +32,7 @@ if (currentTheme === "dark") {
   }
 }
 
-// links vavbar
+//! links vavbar
 
 var sections = document.querySelectorAll("section");
 var navLinks = document.querySelectorAll(".nav-links a");
@@ -209,123 +209,174 @@ window.addEventListener("resize", updateCarousel);
 // أول تشغيل
 updateCarousel();
 
-//! llllllllllllllllllllllllllllllllllllllllllll
+//! ==========================================
+// Settings Sidebar
 // ==========================================
-// 1. فتح وقفل القائمة الجانبية (Sidebar)
-// ==========================================
-var settingsToggle = document.getElementById("settings-toggle");
-var settingsSidebar = document.getElementById("settings-sidebar");
-var closeSettings = document.getElementById("close-settings");
 
-if (settingsToggle && settingsSidebar && closeSettings) {
-  // عند الضغط على الترس: افتح
-  settingsToggle.addEventListener("click", function () {
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. عناصر التحكم في فتح وغلق السايدبار
+  const settingsToggle = document.getElementById("settings-toggle");
+  const settingsSidebar = document.getElementById("settings-sidebar");
+  const closeSettings = document.getElementById("close-settings");
+
+  // فتح السايدبار (مع منع انتشار الـ Click عشان متقفلش في نفس اللحظة)
+  settingsToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
     settingsSidebar.classList.remove("translate-x-full");
-    settingsSidebar.classList.add("translate-x-0");
+    settingsToggle.setAttribute("aria-expanded", "true");
+    settingsSidebar.setAttribute("aria-hidden", "false");
   });
 
-  // عند الضغط على الـ X: اقفل
-  closeSettings.addEventListener("click", function () {
-    settingsSidebar.classList.remove("translate-x-0");
+  // غلق السايدبار
+  closeSettings.addEventListener("click", () => {
     settingsSidebar.classList.add("translate-x-full");
+    settingsToggle.setAttribute("aria-expanded", "false");
+    settingsSidebar.setAttribute("aria-hidden", "true");
   });
-}
 
-// ==========================================
-// 2. تغيير نوع الخط (Fonts)
-// ==========================================
-var fontOptions = document.querySelectorAll(".font-option");
+  // غلق السايدبار عند الضغط في أي مكان خارجها
+  document.addEventListener("click", (e) => {
+    if (
+      !settingsSidebar.contains(e.target) &&
+      !settingsToggle.contains(e.target)
+    ) {
+      settingsSidebar.classList.add("translate-x-full");
+    }
+  });
 
-fontOptions.forEach(function (btn) {
-  btn.addEventListener("click", function () {
-    var chosenFont = btn.getAttribute("data-font"); // بيلقط (cairo أو tajawal أو alexandria)
+  // ==========================================
+  // 2. تخصيص الخطوط (Fonts)
+  // ==========================================
+  const fontOptions = document.querySelectorAll(".font-option");
 
-    // بنغير كلاس الخط في الـ body بالكامل
-    document.body.style.fontFamily = chosenFont + ", sans-serif";
+  const fonts = {
+    tajawal: "font-tajawal",
+    alexandria: "font-alexandria",
+    cairo: "font-cairo",
+  };
 
-    // بننظف علامة الصح الزرقاء من كل الأزرار ونحطها للي اتداس عليه بس
-    fontOptions.forEach(function (b) {
-      b.classList.remove("active");
+  function setFont(fontName) {
+    Object.values(fonts).forEach((className) =>
+      document.body.classList.remove(className),
+    );
+    if (fonts[fontName]) {
+      document.body.classList.add(fonts[fontName]);
+    }
+
+    fontOptions.forEach((btn) => {
+      if (btn.getAttribute("data-font") === fontName) {
+        btn.classList.add("active");
+        btn.setAttribute("aria-checked", "true");
+      } else {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-checked", "false");
+      }
     });
-    btn.classList.add("active");
 
-    localStorage.setItem("saved-font", chosenFont);
+    localStorage.setItem("selected-font", fontName);
+  }
+
+  fontOptions.forEach((button) => {
+    button.addEventListener("click", () => {
+      const fontName = button.getAttribute("data-font");
+      setFont(fontName);
+    });
   });
+
+  // ==========================================
+  // 3. تخصيص ألوان الثيم (Colors)
+  // ==========================================
+  const colorsGrid = document.getElementById("theme-colors-grid");
+
+  const themeColors = [
+    { name: "emerald", primary: "#10b981", accent: "#059669" },
+    { name: "blue", primary: "#3b82f6", accent: "#1d4ed8" },
+    { name: "purple", primary: "#a855f7", accent: "#7e22ce" },
+    { name: "rose", primary: "#f43f5e", accent: "#be123c" },
+    { name: "amber", primary: "#f59e0b", accent: "#b45309" },
+  ];
+
+  themeColors.forEach((color) => {
+    const colorBtn = document.createElement("button");
+    colorBtn.type = "button";
+    colorBtn.className =
+      "w-10 h-10 rounded-full border-2 border-transparent hover:scale-110 transition-transform shadow-sm relative cursor-pointer";
+    colorBtn.style.backgroundColor = color.primary;
+    colorBtn.setAttribute("data-color", color.name);
+    colorBtn.title = color.name;
+
+    colorBtn.addEventListener("click", () => setThemeColor(color));
+    colorsGrid.appendChild(colorBtn);
+  });
+
+  function setThemeColor(colorObj) {
+    // تحديث المتغيرات الأساسية والفرعية للتخلص من تداخل الألوان القديمة في الديفات الداخلية
+    document.documentElement.style.setProperty(
+      "--color-primary",
+      colorObj.primary,
+    );
+    document.documentElement.style.setProperty(
+      "--color-accent",
+      colorObj.accent,
+    );
+    document.documentElement.style.setProperty(
+      "--color-primary-light",
+      colorObj.primary + "22",
+    ); // درجة شفافة جداً للخلفيات الفاتحة
+    document.documentElement.style.setProperty(
+      "--color-primary-dark",
+      colorObj.accent,
+    );
+
+    const buttons = colorsGrid.querySelectorAll("button");
+    buttons.forEach((btn) => {
+      if (btn.getAttribute("data-color") === colorObj.name) {
+        btn.classList.add("border-slate-800", "dark:border-white", "scale-110");
+      } else {
+        btn.classList.remove(
+          "border-slate-800",
+          "dark:border-white",
+          "scale-110",
+        );
+      }
+    });
+
+    localStorage.setItem("selected-theme-color", JSON.stringify(colorObj));
+  }
+
+  // ==========================================
+  // 4. إعادة الضبط (Reset)
+  // ==========================================
+  const resetButton = document.getElementById("reset-settings");
+  resetButton.addEventListener("click", () => {
+    localStorage.removeItem("selected-font");
+    localStorage.removeItem("selected-theme-color");
+
+    setFont("tajawal");
+
+    document.documentElement.style.removeProperty("--color-primary");
+    document.documentElement.style.removeProperty("--color-accent");
+    document.documentElement.style.removeProperty("--color-primary-light");
+    document.documentElement.style.removeProperty("--color-primary-dark");
+
+    const buttons = colorsGrid.querySelectorAll("button");
+    buttons.forEach((btn) =>
+      btn.classList.remove(
+        "border-slate-800",
+        "dark:border-white",
+        "scale-110",
+      ),
+    );
+  });
+
+  // ==========================================
+  // 5. تحميل الإعدادات المحفوظة عند فتح الموقع
+  // ==========================================
+  const savedFont = localStorage.getItem("selected-font") || "tajawal";
+  setFont(savedFont);
+
+  const savedColor = localStorage.getItem("selected-theme-color");
+  if (savedColor) {
+    setThemeColor(JSON.parse(savedColor));
+  }
 });
-
-// ==========================================
-// 3. رسم وتشغيل ألوان الثيم (Colors)
-// ==========================================
-var colorsGrid = document.getElementById("theme-colors-grid");
-
-// لستة الألوان والدرجات اللي كانت في الصورة بتاعتك (أزرق، أخضر، برتقالي، أصفر...)
-var availableColors = [
-  { name: "indigo", hex: "#6366f1" },
-  { name: "emerald", hex: "#10b981" },
-  { name: "amber", hex: "#f59e0b" },
-  { name: "rose", hex: "#f43f5e" },
-  { name: "sky", hex: "#0ea5e9" },
-  { name: "violet", hex: "#8b5cf6" },
-  { name: "teal", hex: "#14b8a6" },
-  { name: "fuchsia", hex: "#d946ef" },
-];
-
-if (colorsGrid) {
-  // بنرسم الدوائر جوة الـ Grid الفاضي تلقائيًا
-  availableColors.forEach(function (color) {
-    var button = document.createElement("button");
-    button.type = "button";
-    // كلاسات تايلويند لعمل دائرة أنيقة
-    button.className =
-      "w-10 h-10 rounded-full border-2 border-transparent hover:scale-110 transition-transform shadow-sm cursor-pointer";
-    button.style.backgroundColor = color.hex;
-    button.setAttribute("data-color", color.hex);
-
-    button.addEventListener("click", function () {
-      // بنغير اللون الأساسي للموقع (المتغير المسؤول في الديزاين الجاهز)
-      document.documentElement.style.setProperty("--color-primary", color.hex);
-      document.documentElement.style.setProperty("--primary", color.hex); // زيادة أمان لو مسمّع كدة
-
-      // حركة جمالية: نحدد الدائرة النشطة
-      document
-        .querySelectorAll("#theme-colors-grid button")
-        .forEach(function (b) {
-          b.style.borderColor = "transparent";
-        });
-      button.style.borderColor = "#000"; // بيعمل إطار أسود حول اللون المختار
-
-      localStorage.setItem("saved-color", color.hex);
-    });
-
-    colorsGrid.appendChild(button);
-  });
-}
-
-// ==========================================
-// 4. زرار إعادة الضبط (Reset)
-// ==========================================
-var resetBtn = document.getElementById("reset-settings");
-if (resetBtn) {
-  resetBtn.addEventListener("click", function () {
-    localStorage.removeItem("saved-font");
-    localStorage.removeItem("saved-color");
-    location.reload(); // ريفريش يرجع كل حاجة زيرو
-  });
-}
-
-// ==========================================
-// 5. عند الريفريش: افتكر الاختيارات القديمة
-// ==========================================
-var savedFont = localStorage.getItem("saved-font");
-var savedColor = localStorage.getItem("saved-color");
-
-if (savedFont) {
-  document.body.style.fontFamily = savedFont + ", sans-serif";
-  // بنرجع ننشط الزرار اللي كان مختار
-  var activeFontBtn = document.querySelector(`[data-font="${savedFont}"]`);
-  if (activeFontBtn) activeFontBtn.classList.add("active");
-}
-if (savedColor) {
-  document.documentElement.style.setProperty("--color-primary", savedColor);
-  document.documentElement.style.setProperty("--primary", savedColor);
-}

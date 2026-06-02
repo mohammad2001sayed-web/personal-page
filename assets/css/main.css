@@ -29,12 +29,29 @@
 
 
 
+/* كود CSS لتفعيل ظهور علامة الصح للزر المختار */
+.font-option.active .absolute {
+  opacity: 1 !important;
+}
+.font-option.active {
+  border-color: var(--color-primary, #3b82f6) !important;
+}
 
 
 
 
 
 
+/*  */
+:root {
+  --theme-color: #3B82F6;
+}
 
+.my-btn {
+  background-color: var(--theme-color);
+}
+
+
+/*  */
 
 
