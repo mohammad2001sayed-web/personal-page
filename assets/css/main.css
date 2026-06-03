@@ -43,15 +43,57 @@
 
 
 /*  */
-:root {
+/* :root {
   --theme-color: #3B82F6;
 }
 
 .my-btn {
   background-color: var(--theme-color);
-}
+} */
 
 
 /*  */
+
+/* الألوان الافتراضية للموقع (أزرق مثلاً) مفرودة RGB */
+:root {
+  --color-primary-rgb: 59, 130, 246;
+  --color-accent-rgb: 29, 78, 216;
+}
+
+/* ثيم الأخضر */
+body.theme-emerald {
+  --color-primary-rgb: 16, 185, 129 !important; /* تعادل emerald-500 */
+  --color-accent-rgb: 5, 150, 105 !important;   /* تعادل emerald-600 */
+}
+
+/* ثيم البنفسجي */
+body.theme-purple {
+  --color-primary-rgb: 168, 85, 247 !important;
+  --color-accent-rgb: 126, 34, 206 !important;
+}
+
+/* ثيم الأحمر */
+body.theme-rose {
+  --color-primary-rgb: 244, 63, 94 !important;
+  --color-accent-rgb: 190, 18, 60 !important;
+}
+
+/* ثيم الأصفر */
+body.theme-amber {
+  --color-primary-rgb: 245, 158, 11 !important;
+  --color-accent-rgb: 180, 83, 9 !important;
+}
+
+/* ستايل الخطوط المختار */
+body.font-tajawal { font-family: 'Tajawal', sans-serif; }
+body.font-alexandria { font-family: 'Alexandria', sans-serif; }
+body.font-cairo { font-family: 'Cairo', sans-serif; }
+
+.font-option.active {
+  border-color: rgb(var(--color-primary-rgb)) !important;
+}
+.font-option.active .absolute {
+  opacity: 1 !important;
+}
 
 
